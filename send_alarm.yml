@@ -1,0 +1,68 @@
+name: Mindset Alarm
+
+on:
+  schedule:
+    - cron: "30 0 * * *"   # 06:00 IST -> Slot 1, Morning anchor
+    - cron: "14 5 * * *"   # 10:44 IST -> Slot 2, Deep work push
+    - cron: "30 7 * * *"   # 13:00 IST -> Slot 3, Midday reset
+    - cron: "30 11 * * *"  # 17:00 IST -> Slot 4, Second-wind
+    - cron: "30 15 * * *"  # 21:00 IST -> Slot 5, Close the day
+  workflow_dispatch:
+    inputs:
+      slot_id:
+        description: "Slot to fire manually (1-5)"
+        required: true
+        default: "1"
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Resolve slot id from cron schedule
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "slot_id=${{ github.event.inputs.slot_id }}" >> "$GITHUB_OUTPUT"
+          else
+            case "${{ github.event.schedule }}" in
+              "30 0 * * *")  echo "slot_id=1" >> "$GITHUB_OUTPUT" ;;
+              "14 5 * * *")  echo "slot_id=2" >> "$GITHUB_OUTPUT" ;;
+              "30 7 * * *")  echo "slot_id=3" >> "$GITHUB_OUTPUT" ;;
+              "30 11 * * *") echo "slot_id=4" >> "$GITHUB_OUTPUT" ;;
+              "30 15 * * *") echo "slot_id=5" >> "$GITHUB_OUTPUT" ;;
+            esac
+          fi
+
+      - name: Send recommendation
+        env:
+          SLOT_ID: ${{ steps.resolve.outputs.slot_id }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+          WHATSAPP_TO: ${{ secrets.WHATSAPP_TO }}
+        run: python scripts/send_recommendation.py
+
+      - name: Commit updated log
+        run: |
+          git config user.name "mindset-alarm-bot"
+          git config user.email "actions@github.com"
+          git add log.json
+          git diff --staged --quiet || git commit -m "log: slot ${{ steps.resolve.outputs.slot_id }} sent"
+          git push
