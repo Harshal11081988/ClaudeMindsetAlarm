@@ -1,0 +1,2 @@
+# ClaudeMindsetAlarm
+Claude mindset alarm
