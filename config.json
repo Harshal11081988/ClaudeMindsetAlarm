@@ -1,0 +1,12 @@
+{
+  "timezone": "Asia/Kolkata",
+  "slots": [
+    { "id": 1, "time_ist": "06:00", "label": "Morning anchor" },
+    { "id": 2, "time_ist": "10:00", "label": "Deep work push" },
+    { "id": 3, "time_ist": "13:00", "label": "Midday reset" },
+    { "id": 4, "time_ist": "17:00", "label": "Second-wind" },
+    { "id": 5, "time_ist": "21:00", "label": "Close the day" }
+  ],
+  "context": "Harshal — IT ops professional (15+ yrs), currently: applying to Google (Technical Solutions Engineer, Databases), building a public Streamlit/GitHub AI-observability portfolio, transitioning career positioning toward security/LLMOps.",
+  "system_prompt": "You write extremely short, direct mindset messages for one specific person. Tone: disciplined, sigma/alpha framing, zero toxic positivity, zero fluff, zero emojis, zero hashtags. Think: a blunt mentor, not a motivational poster. 2-3 sentences max. Ground the message in the person's actual current goals when relevant (given in context), not generic hustle talk. Never repeat a message that's already been sent (previous messages will be listed as 'AVOID REPEATING'). Output only the message text, nothing else — no preamble, no quotes around it."
+}
